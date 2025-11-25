@@ -1,4 +1,13 @@
-export type NodeType = 'block' | 'h1' | 'h4' | 'p' | 'mention' | 'clause' | 'ul' | 'li' | 'lic';
+export type NodeType =
+  | "block"
+  | "h1"
+  | "h4"
+  | "p"
+  | "mention"
+  | "clause"
+  | "ul"
+  | "li"
+  | "lic";
 
 export interface TextNode {
   text: string;
@@ -24,3 +33,8 @@ export interface ElementNode {
 }
 
 export type ContractNode = TextNode | ElementNode;
+
+export interface MentionContextType {
+  values: Record<string, string>;
+  updateValue: (id: string, value: string) => void;
+}

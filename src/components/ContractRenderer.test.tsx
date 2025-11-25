@@ -36,29 +36,27 @@ describe("ContractRenderer", () => {
     expect(colored).toHaveStyle({ color: "rgb(255, 0, 0)" });
   });
 
-  it('renders text node with children and formatting', () => {
-      const data: ContractNode[] = [
-          {
-              text: 'Parent Text',
-              bold: true,
-              children: [
-                  { text: 'Child Text' }
-              ]
-          }
-      ];
-      render(<ContractRenderer data={data} />);
-      
-      // Since content is rendered as <>{content}{childrenContent}</> inside formatting tags,
-      // it renders as <strong>Parent TextChild Text</strong>
-      // So 'Parent Text' alone is not a separate element if it was just a string.
-      // React renders: <strong>Parent Text<span>Child Text</span></strong> (if child was element)
-      // or just <strong>Parent TextChild Text</strong> if child is just text node renderer returning a fragment.
-      // Wait, NodeRenderer for child text returns <>{content}</>.
-      // So it becomes <strong>Parent TextChild Text</strong>.
-      
-      // Let's check for the full text content
-      const strong = screen.getByText('Parent TextChild Text');
-      expect(strong.tagName).toBe('STRONG');
+  it("renders text node with children and formatting", () => {
+    const data: ContractNode[] = [
+      {
+        text: "Parent Text",
+        bold: true,
+        children: [{ text: "Child Text" }],
+      },
+    ];
+    render(<ContractRenderer data={data} />);
+
+    // Since content is rendered as <>{content}{childrenContent}</> inside formatting tags,
+    // it renders as <strong>Parent TextChild Text</strong>
+    // So 'Parent Text' alone is not a separate element if it was just a string.
+    // React renders: <strong>Parent Text<span>Child Text</span></strong> (if child was element)
+    // or just <strong>Parent TextChild Text</strong> if child is just text node renderer returning a fragment.
+    // Wait, NodeRenderer for child text returns <>{content}</>.
+    // So it becomes <strong>Parent TextChild Text</strong>.
+
+    // Let's check for the full text content
+    const strong = screen.getByText("Parent TextChild Text");
+    expect(strong.tagName).toBe("STRONG");
   });
 
   it("renders h1 block with children", () => {
@@ -177,44 +175,44 @@ describe("ContractRenderer", () => {
     expect(screen.getByRole("listitem")).toHaveTextContent("List Item");
   });
 
-  it('updates mention values everywhere when one changes', async () => {
-    const { fireEvent } = await import('@testing-library/react');
-    
+  it("updates mention values everywhere when one changes", async () => {
+    const { fireEvent } = await import("@testing-library/react");
+
     const data: ContractNode[] = [
-        {
-            type: 'block',
-            children: [
-                {
-                    type: 'mention',
-                    id: 'var1',
-                    value: 'InitialValue',
-                    color: 'blue',
-                    children: [{ text: 'InitialValue' }]
-                },
-                { text: ' and ' },
-                {
-                    type: 'mention',
-                    id: 'var1',
-                    value: 'InitialValue',
-                    color: 'blue',
-                    children: [{ text: 'InitialValue' }]
-                }
-            ]
-        }
+      {
+        type: "block",
+        children: [
+          {
+            type: "mention",
+            id: "var1",
+            value: "InitialValue",
+            color: "blue",
+            children: [{ text: "InitialValue" }],
+          },
+          { text: " and " },
+          {
+            type: "mention",
+            id: "var1",
+            value: "InitialValue",
+            color: "blue",
+            children: [{ text: "InitialValue" }],
+          },
+        ],
+      },
     ];
-    
+
     render(<ContractRenderer data={data} />);
-    
-    const inputs = screen.getAllByRole('textbox');
+
+    const inputs = screen.getAllByRole("textbox");
     expect(inputs).toHaveLength(2);
-    expect(inputs[0]).toHaveValue('InitialValue');
-    expect(inputs[1]).toHaveValue('InitialValue');
-    
+    expect(inputs[0]).toHaveValue("InitialValue");
+    expect(inputs[1]).toHaveValue("InitialValue");
+
     // Change the first one
-    fireEvent.change(inputs[0], { target: { value: 'UpdatedValue' } });
-    
+    fireEvent.change(inputs[0], { target: { value: "UpdatedValue" } });
+
     // Both should update
-    expect(inputs[0]).toHaveValue('UpdatedValue');
-    expect(inputs[1]).toHaveValue('UpdatedValue');
+    expect(inputs[0]).toHaveValue("UpdatedValue");
+    expect(inputs[1]).toHaveValue("UpdatedValue");
   });
 });

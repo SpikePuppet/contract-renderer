@@ -1,22 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ContractNode, ElementNode, TextNode } from "../types";
+import { extractMentions, isTextNode } from "../helpers";
+import type { MentionContextType } from "../types";
 
 // Context to track clause nesting level
 const ClauseContext = createContext<number>(0);
 
-// Context to track mention values
-interface MentionContextType {
-  values: Record<string, string>;
-  updateValue: (id: string, value: string) => void;
-}
 const MentionContext = createContext<MentionContextType>({
   values: {},
   updateValue: () => {},
 });
-
-const isTextNode = (node: ContractNode): node is TextNode => {
-  return "text" in node && !("type" in node);
-};
 
 // Both in TextRenderer and ElementRenderer, we want to apply semantic tags where possible.
 // This assists in accessibility for things like screen readers.
@@ -46,9 +39,14 @@ const TextRenderer = ({ node }: { node: TextNode }) => {
   // If formatting is applied (bold: true), does it apply to the text only or the children too?
   // The prompt says "If a JSON object has a mark applied to it, that entire block should be rendered with the applied mark, including any nested elements."
   // So the children should ALSO be wrapped in the formatting tags.
-  
+
   if (childrenContent) {
-      content = <>{content}{childrenContent}</>;
+    content = (
+      <>
+        {content}
+        {childrenContent}
+      </>
+    );
   }
 
   // If there are styles, wrap in a span
@@ -138,7 +136,11 @@ const ElementRenderer = ({
     case "clause":
       return (
         <ClauseContext.Provider value={clauseDepth + 1}>
-          <section className={clauseDepth === 0 ? "contract-clause-main" : "contract-clause-sub"}>
+          <section
+            className={
+              clauseDepth === 0 ? "contract-clause-main" : "contract-clause-sub"
+            }
+          >
             {wrapWithMarks(content)}
           </section>
         </ClauseContext.Provider>
@@ -208,33 +210,14 @@ const NodeRenderer = ({
   parentType?: string;
 }) => {
   if (isTextNode(node)) {
-    return <TextRenderer node={node} />;
+    return <TextRenderer node={node as TextNode} />;
   }
   return <ElementRenderer node={node} parentType={parentType} />;
 };
 
-const extractMentions = (nodes: ContractNode[]): Record<string, string> => {
-  const mentions: Record<string, string> = {};
-  const traverse = (nodes: ContractNode[]) => {
-    nodes.forEach((node) => {
-      if ("type" in node && node.type === "mention" && node.id && node.value) {
-        if (!mentions[node.id]) {
-          mentions[node.id] = node.value;
-        }
-      }
-      // Check children for both ElementNode and TextNode (as TextNode now has optional children)
-      if ("children" in node && node.children) {
-        traverse(node.children);
-      }
-    });
-  };
-  traverse(nodes);
-  return mentions;
-};
-
 export const ContractRenderer = ({ data }: { data: ContractNode[] }) => {
   const [mentionValues, setMentionValues] = useState<Record<string, string>>(
-    () => extractMentions(data)
+    () => extractMentions(data),
   );
 
   // Update state if data prop changes (optional, but good practice if data can be swapped)
