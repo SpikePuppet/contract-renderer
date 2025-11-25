@@ -2,10 +2,14 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+.contract-renderer {
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #333;
   line-height: 1.6;
   text-align: left;
+  counter-reset: clause-0;
 }
 
 .app-container {
@@ -65,12 +69,7 @@
   display: inline;
 }
 
-/* Mentions */
-.contract-mention {
-  font-weight: 500;
-  vertical-align: baseline;
-  white-space: nowrap;
-}
+/* Mentions (moved below) */
 
 /* Clauses */
 .contract-renderer {
@@ -84,7 +83,7 @@
   list-style-position: outside;
   margin-bottom: 16px;
   counter-reset: sub-clause-counter;
-  margin-left: 0; /* Reset default margin if needed */
+  margin-left: 0;
 }
 
 .contract-clause-main::marker {
@@ -93,13 +92,15 @@
   color: #333;
 }
 
+/* Level 1: (a), (b) */
 .contract-clause-sub {
   display: list-item;
   list-style-type: none;
   counter-increment: sub-clause-counter;
   list-style-position: outside;
   margin-bottom: 12px;
-  margin-left: 20px; /* Indent nested clauses */
+  margin-left: 24px;
+  counter-reset: sub-sub-clause-counter; /* Reset next level */
 }
 
 .contract-clause-sub::marker {
@@ -108,9 +109,49 @@
   color: #333;
 }
 
+/* Level 2: (i), (ii) - Nested inside another sub */
+.contract-clause-sub .contract-clause-sub {
+  counter-increment: sub-sub-clause-counter;
+  counter-reset: deep-clause-counter;
+  margin-left: 24px;
+}
+
+.contract-clause-sub .contract-clause-sub::marker {
+  content: "(" counter(sub-sub-clause-counter, lower-roman) ") ";
+}
+
+/* Level 3: (A), (B) */
+.contract-clause-sub .contract-clause-sub .contract-clause-sub {
+  counter-increment: deep-clause-counter;
+  margin-left: 24px;
+}
+
+.contract-clause-sub .contract-clause-sub .contract-clause-sub::marker {
+  content: "(" counter(deep-clause-counter, upper-alpha) ") ";
+}
+
 .contract-clause-sub > p {
   display: inline;
 }
+
+/* Mentions (Base) */
+.contract-mention {
+  font-weight: 500;
+  vertical-align: baseline;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.contract-mention input {
+  font-family: inherit;
+  font-weight: inherit;
+  cursor: text;
+}
+
+.contract-mention input:focus {
+  text-decoration: underline;
+}
+
 
 /* Parties Section specific if needed, but it uses text numbering */
 
