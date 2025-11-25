@@ -94,14 +94,6 @@ describe("ContractRenderer", () => {
       },
     ];
     render(<ContractRenderer data={data} />);
-    const mention = screen.getByText("Mentioned Entity");
-    // The text is inside the span. The span has the style.
-    // Let's find the parent element of the text which should be the mention span.
-    // Or since mention renders children, the text 'Mentioned Entity' is a child text node.
-    // The span wraps it.
-    // screen.getByText returns the element containing the text. If TextRenderer returns a span, and Mention returns a span wrapping it.
-    // Actually TextRenderer returns a span. Mention returns a span.
-    // So: <span class="contract-mention" ...><span ...>Mentioned Entity</span></span>
 
     // Let's find by class name to be safe about structural checks
     const mentionEl = document.querySelector(".contract-mention");

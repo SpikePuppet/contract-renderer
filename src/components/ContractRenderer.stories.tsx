@@ -183,31 +183,100 @@ export const NestedClauses: Story = {
 };
 
 export const Lists: Story = {
+    args: {
+        data: [
+            {
+                type: "ul",
+                children: [
+                    {
+                        type: "li",
+                        children: [
+                            {
+                                type: "lic",
+                                children: [{ text: "Item 1" }]
+                            }
+                        ]
+                    },
+                    {
+                        type: "li",
+                        children: [
+                            {
+                                type: "lic",
+                                children: [{ text: "Item 2" }]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+};
+
+export const ContinuousNumbering: Story = {
   args: {
     data: [
       {
-        type: "ul",
+        type: "clause",
         children: [
           {
-            type: "li",
-            children: [
-              {
-                type: "lic",
-                children: [{ text: "Item 1" }],
-              },
-            ],
+            type: "p",
+            children: [{ text: "Clause 1 (Should be '1.')" }]
+          }
+        ]
+      },
+      {
+        type: "p",
+        children: [{ text: "This is a non-clause paragraph breaking the sequence." }]
+      },
+      {
+        type: "clause",
+        children: [
+          {
+            type: "p",
+            children: [{ text: "Clause 2 (Should be '2.')" }]
+          }
+        ]
+      },
+      {
+        type: "clause",
+        children: [
+          {
+            type: "p",
+            children: [{ text: "Clause 3 (Should be '3.')" }]
           },
           {
-            type: "li",
+            type: "clause",
             children: [
               {
-                type: "lic",
-                children: [{ text: "Item 2" }],
-              },
-            ],
+                type: "p",
+                children: [{ text: "Nested 3(a)" }]
+              }
+            ]
           },
-        ],
+          {
+            type: "clause",
+            children: [
+              {
+                type: "p",
+                children: [{ text: "Nested 3(b)" }]
+              }
+            ]
+          }
+        ]
       },
-    ],
-  },
+      {
+        type: "p",
+        children: [{ text: "Another break." }]
+      },
+      {
+        type: "clause",
+        children: [
+          {
+            type: "p",
+            children: [{ text: "Clause 4 (Should be '4.')" }]
+          }
+        ]
+      }
+    ]
+  }
 };
