@@ -22,6 +22,25 @@ const TextRenderer = ({ node }: { node: TextNode }) => {
     style.whiteSpace = "pre-wrap";
   }
 
+  // If children exist, render them after the text
+  let childrenContent: React.ReactNode = null;
+  if (node.children && node.children.length > 0) {
+    childrenContent = node.children.map((child, index) => (
+      <NodeRenderer key={index} node={child} />
+    ));
+  }
+
+  // Combine text and children
+  // NOTE: In standard DOM/React, if we wrap 'content' in a span/strong/em, we usually want the children to be OUTSIDE or INSIDE depending on semantics.
+  // Given the JSON structure { text: "...", children: [...] }, it implies the node is a container that HAS text AND children.
+  // If formatting is applied (bold: true), does it apply to the text only or the children too?
+  // The prompt says "If a JSON object has a mark applied to it, that entire block should be rendered with the applied mark, including any nested elements."
+  // So the children should ALSO be wrapped in the formatting tags.
+  
+  if (childrenContent) {
+      content = <>{content}{childrenContent}</>;
+  }
+
   // If there are styles, wrap in a span
   if (Object.keys(style).length > 0) {
     content = <span style={style}>{content}</span>;

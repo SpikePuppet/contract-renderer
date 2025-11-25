@@ -36,6 +36,31 @@ describe("ContractRenderer", () => {
     expect(colored).toHaveStyle({ color: "rgb(255, 0, 0)" });
   });
 
+  it('renders text node with children and formatting', () => {
+      const data: ContractNode[] = [
+          {
+              text: 'Parent Text',
+              bold: true,
+              children: [
+                  { text: 'Child Text' }
+              ]
+          }
+      ];
+      render(<ContractRenderer data={data} />);
+      
+      // Since content is rendered as <>{content}{childrenContent}</> inside formatting tags,
+      // it renders as <strong>Parent TextChild Text</strong>
+      // So 'Parent Text' alone is not a separate element if it was just a string.
+      // React renders: <strong>Parent Text<span>Child Text</span></strong> (if child was element)
+      // or just <strong>Parent TextChild Text</strong> if child is just text node renderer returning a fragment.
+      // Wait, NodeRenderer for child text returns <>{content}</>.
+      // So it becomes <strong>Parent TextChild Text</strong>.
+      
+      // Let's check for the full text content
+      const strong = screen.getByText('Parent TextChild Text');
+      expect(strong.tagName).toBe('STRONG');
+  });
+
   it("renders h1 block with children", () => {
     const data: ContractNode[] = [
       {

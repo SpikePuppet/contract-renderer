@@ -6,6 +6,7 @@ export interface TextNode {
   italic?: boolean;
   underline?: boolean;
   color?: string;
+  children?: ContractNode[];
 }
 
 export interface ElementNode {
