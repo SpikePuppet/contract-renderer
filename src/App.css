@@ -73,65 +73,70 @@
 
 /* Clauses */
 .contract-renderer {
-  counter-reset: main-clause-counter;
+  counter-reset: clause-0;
 }
 
-.contract-clause-main {
+.contract-clause {
   display: list-item;
   list-style-type: none;
-  counter-increment: main-clause-counter;
   list-style-position: outside;
-  margin-bottom: 16px;
-  counter-reset: sub-clause-counter;
-  margin-left: 0;
+  margin-bottom: 12px;
 }
 
-.contract-clause-main::marker {
-  content: counter(main-clause-counter) ". ";
+.contract-clause > p {
+  display: inline;
+}
+
+/* Level 0: 1, 2, 3... */
+.contract-clause[data-depth="0"] {
+  counter-increment: clause-0;
+  counter-reset: clause-1;
+  margin-left: 0;
+  margin-bottom: 16px;
+}
+
+.contract-clause[data-depth="0"]::marker {
+  content: counter(clause-0) ". ";
   font-weight: bold;
   color: #333;
 }
 
-/* Level 1: (a), (b) */
-.contract-clause-sub {
-  display: list-item;
-  list-style-type: none;
-  counter-increment: sub-clause-counter;
-  list-style-position: outside;
-  margin-bottom: 12px;
-  margin-left: 24px;
-  counter-reset: sub-sub-clause-counter; /* Reset next level */
+/* Level 1: (a), (b), (c)... */
+.contract-clause[data-depth="1"] {
+  counter-increment: clause-1;
+  counter-reset: clause-2;
+  margin-left: 20px;
 }
 
-.contract-clause-sub::marker {
-  content: "(" counter(sub-clause-counter, lower-alpha) ") ";
+.contract-clause[data-depth="1"]::marker {
+  content: "(" counter(clause-1, lower-alpha) ") ";
   font-weight: normal;
   color: #333;
 }
 
-/* Level 2: (i), (ii) - Nested inside another sub */
-.contract-clause-sub .contract-clause-sub {
-  counter-increment: sub-sub-clause-counter;
-  counter-reset: deep-clause-counter;
-  margin-left: 24px;
+/* Level 2: (i), (ii), (iii)... */
+.contract-clause[data-depth="2"] {
+  counter-increment: clause-2;
+  counter-reset: clause-3;
+  margin-left: 40px;
 }
 
-.contract-clause-sub .contract-clause-sub::marker {
-  content: "(" counter(sub-sub-clause-counter, lower-roman) ") ";
+.contract-clause[data-depth="2"]::marker {
+  content: "(" counter(clause-2, lower-roman) ") ";
+  font-weight: normal;
+  color: #333;
 }
 
-/* Level 3: (A), (B) */
-.contract-clause-sub .contract-clause-sub .contract-clause-sub {
-  counter-increment: deep-clause-counter;
-  margin-left: 24px;
+/* Level 3: (A), (B), (C)... */
+.contract-clause[data-depth="3"] {
+  counter-increment: clause-3;
+  margin-left: 60px;
 }
 
-.contract-clause-sub .contract-clause-sub .contract-clause-sub::marker {
-  content: "(" counter(deep-clause-counter, upper-alpha) ") ";
-}
-
-.contract-clause-sub > p {
-  display: inline;
+.contract-clause[data-depth="3"]::marker {
+  content: "(" counter(clause-3, upper-alpha) ") ";
+  font-weight: normal;
+  color: #333;
 }
 
 /* Mentions (Base) */
