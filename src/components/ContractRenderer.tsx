@@ -1,32 +1,66 @@
-import React from 'react';
-import type { ContractNode, ElementNode, TextNode } from '../types';
+import React from "react";
+import type { ContractNode, ElementNode, TextNode } from "../types";
 
 const isTextNode = (node: ContractNode): node is TextNode => {
-  return 'text' in node && !('type' in node);
+  return "text" in node && !("type" in node);
 };
 
+// Both in TextRenderer and ElementRenderer, we want to apply semantic tags where possible.
+// This assists in accessibility for things like screen readers.
 const TextRenderer = ({ node }: { node: TextNode }) => {
-  const style: React.CSSProperties = {};
-  if (node.bold) style.fontWeight = 'bold';
-  if (node.italic) style.fontStyle = 'italic';
-  if (node.underline) style.textDecoration = 'underline';
-  if (node.color) style.color = node.color;
+  let content: React.ReactNode = node.text;
 
-  // Handle newline characters in text
-  if (node.text.includes('\n')) {
-     return <span style={{ whiteSpace: 'pre-wrap', ...style }}>{node.text}</span>;
+  // Handle styles that don't have semantic tags (color, whitespace)
+  const style: React.CSSProperties = {};
+  if (node.color) {
+    style.color = node.color;
+  }
+  if (node.text.includes("\n")) {
+    style.whiteSpace = "pre-wrap";
   }
 
-  return <span style={style}>{node.text}</span>;
+  // If there are styles, wrap in a span
+  if (Object.keys(style).length > 0) {
+    content = <span style={style}>{content}</span>;
+  }
+
+  // Apply semantic marks
+  if (node.bold) {
+    content = <strong>{content}</strong>;
+  }
+  if (node.italic) {
+    content = <em>{content}</em>;
+  }
+  if (node.underline) {
+    content = <u>{content}</u>;
+  }
+
+  return <>{content}</>;
 };
 
-const ElementRenderer = ({ node, parentType }: { node: ElementNode; parentType?: string }) => {
+const ElementRenderer = ({
+  node,
+  parentType,
+}: {
+  node: ElementNode;
+  parentType?: string;
+}) => {
   const { type, children, text, color } = node;
 
-  const markStyle: React.CSSProperties = {};
-  if (node.bold) markStyle.fontWeight = 'bold';
-  if (node.italic) markStyle.fontStyle = 'italic';
-  if (node.underline) markStyle.textDecoration = 'underline';
+  // Helper to wrap content with semantic tags based on marks
+  const wrapWithMarks = (content: React.ReactNode) => {
+    let wrapped = content;
+    if (node.bold) {
+      wrapped = <strong>{wrapped}</strong>;
+    }
+    if (node.italic) {
+      wrapped = <em>{wrapped}</em>;
+    }
+    if (node.underline) {
+      wrapped = <u>{wrapped}</u>;
+    }
+    return wrapped;
+  };
 
   const renderChildren = () => {
     if (children) {
@@ -35,56 +69,75 @@ const ElementRenderer = ({ node, parentType }: { node: ElementNode; parentType?:
       ));
     }
     if (text) {
-        return <span className="element-text">{text}</span>;
+      return <span className="element-text">{text}</span>;
     }
     return null;
   };
 
+  const content = renderChildren();
+
   switch (type) {
-    case 'block':
-      return <div className="contract-block" style={markStyle}>{renderChildren()}</div>;
-    case 'h1':
-      return <h1 className="contract-title" style={markStyle}>{renderChildren()}</h1>;
-    case 'h4':
-      return <h4 className="contract-subtitle" style={markStyle}>{renderChildren()}</h4>;
-    case 'p':
+    case "block":
+      return <div className="contract-block">{wrapWithMarks(content)}</div>;
+    case "h1":
+      return <h1 className="contract-title">{wrapWithMarks(content)}</h1>;
+    case "h4":
+      return <h4 className="contract-subtitle">{wrapWithMarks(content)}</h4>;
+    case "p":
       // If a paragraph is nested inside another paragraph, render it as a span to avoid invalid HTML
       // and broken layout.
-      if (parentType === 'p') {
-         return <span className="contract-text-inline" style={markStyle}>{renderChildren()}</span>;
-      }
-      return <p className="contract-text" style={markStyle}>{renderChildren()}</p>;
-    case 'ul':
-      return <ul className="contract-list" style={markStyle}>{renderChildren()}</ul>;
-    case 'li':
-      return <li className="contract-list-item" style={markStyle}>{renderChildren()}</li>;
-    case 'lic':
-        // List item content
-        return <div className="contract-list-content" style={markStyle}>{renderChildren()}</div>;
-    case 'clause':
-        return <section className="contract-clause" style={markStyle}>{renderChildren()}</section>;
-    case 'mention':
+      if (parentType === "p") {
         return (
-            <span 
-                className="contract-mention" 
-                style={{ 
-                    backgroundColor: color,
-                    color: 'white',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    display: 'inline-block',
-                    ...markStyle
-                }}
-            >
-                {renderChildren()}
-            </span>
+          <span className="contract-text-inline">{wrapWithMarks(content)}</span>
         );
+      }
+      return <p className="contract-text">{wrapWithMarks(content)}</p>;
+    case "ul":
+      return <ul className="contract-list">{wrapWithMarks(content)}</ul>;
+    case "li":
+      return <li className="contract-list-item">{wrapWithMarks(content)}</li>;
+    case "lic":
+      // List item content
+      return (
+        <div className="contract-list-content">{wrapWithMarks(content)}</div>
+      );
+    case "clause":
+      return (
+        <section className="contract-clause">{wrapWithMarks(content)}</section>
+      );
+    case "mention":
+      // For mentions, we might want to keep the style on the span itself or wrap inside.
+      // The requirement is semantic tags.
+      return (
+        <span
+          className="contract-mention"
+          style={{
+            backgroundColor: color,
+            color: "white",
+            padding: "2px 6px",
+            borderRadius: "4px",
+            display: "inline-block",
+          }}
+        >
+          {wrapWithMarks(content)}
+        </span>
+      );
     default:
-      return <div className={`contract-element-${type}`} style={markStyle}>{renderChildren()}</div>;
+      return (
+        <div className={`contract-element-${type}`}>
+          {wrapWithMarks(content)}
+        </div>
+      );
   }
 };
 
-const NodeRenderer = ({ node, parentType }: { node: ContractNode; parentType?: string }) => {
+const NodeRenderer = ({
+  node,
+  parentType,
+}: {
+  node: ContractNode;
+  parentType?: string;
+}) => {
   if (isTextNode(node)) {
     return <TextRenderer node={node} />;
   }
