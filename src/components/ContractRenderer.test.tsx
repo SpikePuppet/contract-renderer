@@ -78,9 +78,6 @@ describe("ContractRenderer", () => {
     ];
     render(<ContractRenderer data={data} />);
     const p = screen.getByText("Paragraph text");
-    // It might match the span inside the p or the p itself depending on exact structure
-    // But checking if it's in the document is a good start.
-    // To check tag name:
     expect(p.tagName).toMatch(/^(P|SPAN)$/);
     expect(p).toBeInTheDocument();
   });
@@ -121,17 +118,9 @@ describe("ContractRenderer", () => {
     ];
     render(<ContractRenderer data={data} />);
 
-    // Now we expect semantic tags instead of styles on the block
-    // The structure should be <div class="contract-block"><u><em><strong>...</strong></em></u></div>
     const block = document.querySelector(".contract-block");
     expect(block).toBeInTheDocument();
 
-    // Check that the block contains the semantic tags
-    // Note: The order of wrapping depends on the implementation.
-    // Current impl: bold -> strong, italic -> em, underline -> u.
-    // So wrapped: <u><em><strong>...</strong></em></u>
-
-    // We can check if the text is inside these tags
     const text = screen.getByText("Inherited Styles");
     const strong = text.closest("strong");
     const em = text.closest("em");

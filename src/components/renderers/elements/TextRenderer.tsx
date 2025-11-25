@@ -1,6 +1,6 @@
 import React from "react";
 import type { TextNode } from "../../../types";
-import { applyMarks } from "../../../helpers";
+import { applyMarks } from "../../../helpers.tsx";
 import { NodeRenderer } from "../NodeRenderer";
 
 export const TextRenderer = ({ node }: { node: TextNode }) => {

@@ -1,6 +1,5 @@
-import React from "react";
 import type { ElementNode } from "../../../types";
-import { applyMarks } from "../../../helpers";
+import { applyMarks } from "../../../helpers.tsx";
 import { NodeRenderer } from "../NodeRenderer";
 
 export const StandardElementRenderer = ({
@@ -53,7 +52,10 @@ export const StandardElementRenderer = ({
         <div className="contract-list-content">{applyMarks(content, node)}</div>
       );
     default:
-      // @ts-expect-error - exhaustive check
-      return <div className={`contract-element-${type}`}>{applyMarks(content, node)}</div>;
+      return (
+        <div className={`contract-element-${type}`}>
+          {applyMarks(content, node)}
+        </div>
+      );
   }
 };

@@ -7,9 +7,11 @@ export interface Marks {
   underline?: boolean;
 }
 
+// In this case, we specifically apply the actual semantic tags to the content,
+// to ensure better accessibility.
 export const applyMarks = (
   content: React.ReactNode,
-  marks: Marks
+  marks: Marks,
 ): React.ReactNode => {
   let wrapped = content;
   if (marks.bold) {

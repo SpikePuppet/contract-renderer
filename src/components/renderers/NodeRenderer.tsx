@@ -1,4 +1,3 @@
-import React from "react";
 import type { ContractNode, TextNode } from "../../types";
 import { isTextNode } from "../../helpers";
 import { TextRenderer } from "./elements/TextRenderer";
