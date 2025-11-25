@@ -1,4 +1,4 @@
-import type { ContractNode, TextNode } from "../types";
+import type { ContractNode, TextNode } from "./types";
 
 export const extractMentions = (
   nodes: ContractNode[],
