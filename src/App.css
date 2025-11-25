@@ -35,11 +35,11 @@
 
 .contract-subtitle {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: normal; /* Was 600. Let text content control bolding. */
   color: #34495e;
   margin-top: 24px;
   margin-bottom: 8px;
-  text-decoration: underline; /* Screenshot shows underline for "Key Details."? No, input.json has underline text property */
+  /* text-decoration: underline; REMOVED: formatting marks control underline */
 }
 
 /* Note: input.json has "underline": true for the text inside h4, so we don't need to force it on h4 */
