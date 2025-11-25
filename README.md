@@ -1,73 +1,77 @@
-# React + TypeScript + Vite
+# Contract Renderer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a React-based contract rendering engine built with TypeScript and Vite. It takes a JSON representation of a legal document and renders it into a styled, interactive web page.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Recursive Rendering**: Handles deeply nested document structures including blocks, lists, and paragraphs.
+- **Rich Text Formatting**: Supports bold, italic, and underlined text, including nested formatting.
+- **Clauses & Numbering**: Implements complex legal numbering logic (e.g., 1., 1(a), 1(a)(i)) that persists across the document.
+- **Interactive Mentions**: Supports "variable" fields (Mentions) that are synchronized across the document. Updating one instance updates all other instances of the same variable in real-time.
+- **Modular Architecture**: Built with a clear separation of concerns using Context API for state management and specialized sub-renderers.
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js (v18 or later recommended)
+- npm
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1.  Clone the repository.
+2.  Install dependencies:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Running the Application
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+To start the local development server:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+The application will load the sample contract defined in `src/input.json`.
+
+## Development & Testing
+
+### Storybook
+
+We use Storybook for component development and visual testing. It provides isolated environments to view different states of the renderer (e.g., lists, nested clauses, formatting), and we've also done some tests to verify what is in the notion doc is being displayed.
+
+To start Storybook:
+
+```bash
+npm run storybook
+```
+
+### Unit & Integration Tests
+
+The project uses **Vitest** and **React Testing Library** for testing. The test suite covers:
+
+- Unit tests for helper functions.
+- Component tests for renderers.
+- Interaction tests for the Mentions feature.
+- Visual structure tests for Clause numbering.
+
+To run the tests:
+
+```bash
+npm test
+```
+
+## Architecture
+
+The rendering logic is split into specialized components found in `src/components/renderers/`:
+
+- **`ContractRenderer`**: The entry point that initializes the `MentionContext` and `ClauseContext`, and turns out JSON into a series of nodes.
+- **`NodeRenderer`**: Dispatches rendering to specific sub-renderers based on node type.
+- **`ElementRenderer`**: Handles structural elements (`block`, `ul`, `li`, etc.).
+- **`ClauseRenderer`**: Manages the CSS counters for legal numbering logic.
+- **`MentionRenderer`**: Handles the interactive input fields for variables - this looks after mentions
+- **`TextRenderer`**: Renders text nodes with applied formatting marks.
+
+State management for mentions and clause nesting depth is handled via React Contexts to avoid prop drilling.
