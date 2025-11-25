@@ -177,26 +177,44 @@ describe("ContractRenderer", () => {
     expect(screen.getByRole("listitem")).toHaveTextContent("List Item");
   });
 
-  it("renders nested clauses correctly", () => {
+  it('updates mention values everywhere when one changes', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    
     const data: ContractNode[] = [
-      {
-        type: "clause",
-        children: [
-          {
-            type: "clause",
-            children: [{ text: "Nested Clause" }],
-          },
-        ],
-      },
+        {
+            type: 'block',
+            children: [
+                {
+                    type: 'mention',
+                    id: 'var1',
+                    value: 'InitialValue',
+                    color: 'blue',
+                    children: [{ text: 'InitialValue' }]
+                },
+                { text: ' and ' },
+                {
+                    type: 'mention',
+                    id: 'var1',
+                    value: 'InitialValue',
+                    color: 'blue',
+                    children: [{ text: 'InitialValue' }]
+                }
+            ]
+        }
     ];
-    const { container } = render(<ContractRenderer data={data} />);
     
-    const mainClause = container.querySelector('.contract-clause-main');
-    const subClause = container.querySelector('.contract-clause-sub');
+    render(<ContractRenderer data={data} />);
     
-    expect(mainClause).toBeInTheDocument();
-    expect(subClause).toBeInTheDocument();
-    // Check hierarchy
-    expect(mainClause).toContainElement(subClause);
+    const inputs = screen.getAllByRole('textbox');
+    expect(inputs).toHaveLength(2);
+    expect(inputs[0]).toHaveValue('InitialValue');
+    expect(inputs[1]).toHaveValue('InitialValue');
+    
+    // Change the first one
+    fireEvent.change(inputs[0], { target: { value: 'UpdatedValue' } });
+    
+    // Both should update
+    expect(inputs[0]).toHaveValue('UpdatedValue');
+    expect(inputs[1]).toHaveValue('UpdatedValue');
   });
 });

@@ -1,8 +1,18 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ContractNode, ElementNode, TextNode } from "../types";
 
 // Context to track clause nesting level
 const ClauseContext = createContext<number>(0);
+
+// Context to track mention values
+interface MentionContextType {
+  values: Record<string, string>;
+  updateValue: (id: string, value: string) => void;
+}
+const MentionContext = createContext<MentionContextType>({
+  values: {},
+  updateValue: () => {},
+});
 
 const isTextNode = (node: ContractNode): node is TextNode => {
   return "text" in node && !("type" in node);
@@ -69,6 +79,7 @@ const ElementRenderer = ({
 }) => {
   const { type, children, text, color } = node;
   const clauseDepth = useContext(ClauseContext);
+  const { values, updateValue } = useContext(MentionContext);
 
   // Helper to wrap content with semantic tags based on marks
   const wrapWithMarks = (content: React.ReactNode) => {
@@ -133,8 +144,39 @@ const ElementRenderer = ({
         </ClauseContext.Provider>
       );
     case "mention":
-      // For mentions, we might want to keep the style on the span itself or wrap inside.
-      // The requirement is semantic tags.
+      // If it has an ID, it's a variable mention
+      if (node.id) {
+        const currentValue = values[node.id] || node.value || "";
+        return (
+          <span
+            className="contract-mention"
+            style={{
+              backgroundColor: color,
+              color: "white",
+              padding: "2px 6px",
+              borderRadius: "4px",
+              display: "inline-block",
+            }}
+          >
+            <input
+              value={currentValue}
+              onChange={(e) => updateValue(node.id!, e.target.value)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "white",
+                font: "inherit",
+                outline: "none",
+                width: `${Math.max(currentValue.length, 1)}ch`, // Simple auto-width
+                minWidth: "20px",
+                padding: 0,
+                margin: 0,
+              }}
+            />
+          </span>
+        );
+      }
+      // Fallback if no ID
       return (
         <span
           className="contract-mention"
@@ -171,14 +213,48 @@ const NodeRenderer = ({
   return <ElementRenderer node={node} parentType={parentType} />;
 };
 
+const extractMentions = (nodes: ContractNode[]): Record<string, string> => {
+  const mentions: Record<string, string> = {};
+  const traverse = (nodes: ContractNode[]) => {
+    nodes.forEach((node) => {
+      if ("type" in node && node.type === "mention" && node.id && node.value) {
+        if (!mentions[node.id]) {
+          mentions[node.id] = node.value;
+        }
+      }
+      // Check children for both ElementNode and TextNode (as TextNode now has optional children)
+      if ("children" in node && node.children) {
+        traverse(node.children);
+      }
+    });
+  };
+  traverse(nodes);
+  return mentions;
+};
+
 export const ContractRenderer = ({ data }: { data: ContractNode[] }) => {
+  const [mentionValues, setMentionValues] = useState<Record<string, string>>(
+    () => extractMentions(data)
+  );
+
+  // Update state if data prop changes (optional, but good practice if data can be swapped)
+  useEffect(() => {
+    setMentionValues(extractMentions(data));
+  }, [data]);
+
+  const updateValue = (id: string, value: string) => {
+    setMentionValues((prev) => ({ ...prev, [id]: value }));
+  };
+
   return (
     <div className="contract-renderer">
-      <ClauseContext.Provider value={0}>
-        {data.map((node, index) => (
-          <NodeRenderer key={index} node={node} />
-        ))}
-      </ClauseContext.Provider>
+      <MentionContext.Provider value={{ values: mentionValues, updateValue }}>
+        <ClauseContext.Provider value={0}>
+          {data.map((node, index) => (
+            <NodeRenderer key={index} node={node} />
+          ))}
+        </ClauseContext.Provider>
+      </MentionContext.Provider>
     </div>
   );
 };
