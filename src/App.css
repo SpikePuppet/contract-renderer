@@ -1,115 +1,107 @@
 #root {
-  max-width: 1280px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #333;
+  line-height: 1.6;
+  text-align: left;
 }
 
-.contract-container {
-  max-width: 800px;
-  margin: 0 auto;
+.app-container {
   background-color: white;
-  color: #333;
   padding: 40px;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.contract-header {
-  border-bottom: 2px solid #eee;
-  padding-bottom: 20px;
-  margin-bottom: 30px;
+/* Top Level Blocks */
+.contract-block {
+  margin-bottom: 24px;
 }
 
-.contract-header h1 {
+/* Typography */
+.contract-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #3b4a6b; /* Dark blue-ish like screenshot */
+  margin-bottom: 16px;
   margin-top: 0;
-  color: #2c3e50;
 }
 
-.contract-meta {
-  display: flex;
-  gap: 20px;
-  font-size: 0.9em;
-  color: #666;
-  align-items: center;
-}
-
-.status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  font-size: 0.8em;
-  font-weight: bold;
-}
-
-.status-draft {
-  background-color: #f39c12;
-  color: white;
-}
-
-.status-active {
-  background-color: #27ae60;
-  color: white;
-}
-
-.parties-section {
-  margin-bottom: 40px;
-}
-
-.parties-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 15px;
-}
-
-.party-card {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-}
-
-.party-card h3 {
-  margin-top: 0;
-  font-size: 1em;
-  color: #7f8c8d;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.party-card .address {
-  color: #666;
-  font-size: 0.9em;
-}
-
-.contract-content {
-  line-height: 1.6;
-}
-
-.contract-clause {
-  margin-bottom: 25px;
-}
-
-.contract-clause h3 {
-  margin-bottom: 10px;
+.contract-subtitle {
+  font-size: 18px;
+  font-weight: 600;
   color: #34495e;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  text-decoration: underline; /* Screenshot shows underline for "Key Details."? No, input.json has underline text property */
 }
 
-.contract-footer {
-  margin-top: 50px;
-  text-align: center;
-  font-style: italic;
-  color: #999;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
+/* Note: input.json has "underline": true for the text inside h4, so we don't need to force it on h4 */
+
+.contract-text {
+  margin-bottom: 12px;
+  color: #333;
+  font-size: 16px;
 }
 
-.loading {
-  text-align: center;
-  padding: 50px;
-  font-size: 1.2em;
-  color: #666;
+.contract-text-inline {
+    /* For when p is nested in p (rendered as span) */
+}
+
+/* Lists */
+.contract-list {
+  padding-left: 24px;
+  margin-bottom: 16px;
+  list-style-type: disc;
+}
+
+.contract-list-item {
+  margin-bottom: 8px;
+}
+
+.contract-list-content {
+  display: inline;
+}
+
+/* Mentions */
+.contract-mention {
+  font-weight: 500;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+/* Clauses */
+.contract-clause {
+  margin-bottom: 16px;
+  counter-reset: subclause; /* Reset counter for nested clauses */
+}
+
+/* Nested Clauses (e.g. Definitions items) */
+.contract-clause > .contract-clause {
+  margin-left: 0px; /* Screenshot doesn't show much indent for the (a) itself, maybe hanging indent? */
+  margin-bottom: 12px;
+  display: block;
+}
+
+.contract-clause > .contract-clause::before {
+  counter-increment: subclause;
+  content: "(" counter(subclause, lower-alpha) ") ";
+  font-weight: normal;
+  margin-right: 4px;
+  color: #333;
+}
+
+.contract-clause > .contract-clause > p {
+  display: inline;
+}
+
+/* Parties Section specific if needed, but it uses text numbering */
+
+/* Element unknown fallback */
+[class^="contract-unknown-"] {
+  border: 1px dashed red;
+  padding: 4px;
+  margin: 4px 0;
 }
