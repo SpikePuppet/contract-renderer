@@ -20,15 +20,16 @@ describe("ContractRenderer", () => {
     render(<ContractRenderer data={data} />);
 
     const bold = screen.getByText("Bold Text");
-    // With semantic tags, the text is inside a strong/em/u tag.
-    // screen.getByText returns the element containing the text.
-    expect(bold.tagName).toBe("STRONG");
+    expect(bold.tagName).toBe("SPAN");
+    expect(bold.closest("strong")).toBeInTheDocument();
 
     const italic = screen.getByText("Italic Text");
-    expect(italic.tagName).toBe("EM");
+    expect(italic.tagName).toBe("SPAN");
+    expect(italic.closest("em")).toBeInTheDocument();
 
     const underline = screen.getByText("Underlined Text");
-    expect(underline.tagName).toBe("U");
+    expect(underline.tagName).toBe("SPAN");
+    expect(underline.closest("u")).toBeInTheDocument();
 
     const colored = screen.getByText("Colored Text");
 
@@ -46,17 +47,13 @@ describe("ContractRenderer", () => {
     ];
     render(<ContractRenderer data={data} />);
 
-    // Since content is rendered as <>{content}{childrenContent}</> inside formatting tags,
-    // it renders as <strong>Parent TextChild Text</strong>
-    // So 'Parent Text' alone is not a separate element if it was just a string.
-    // React renders: <strong>Parent Text<span>Child Text</span></strong> (if child was element)
-    // or just <strong>Parent TextChild Text</strong> if child is just text node renderer returning a fragment.
-    // Wait, NodeRenderer for child text returns <>{content}</>.
-    // So it becomes <strong>Parent TextChild Text</strong>.
+    // Check for parent text and its wrapper
+    const parentText = screen.getByText("Parent Text", { exact: false });
+    expect(parentText.closest("strong")).toBeInTheDocument();
 
-    // Let's check for the full text content
-    const strong = screen.getByText("Parent TextChild Text");
-    expect(strong.tagName).toBe("STRONG");
+    // Check for child text and its wrapper (should also be inside strong)
+    const childText = screen.getByText("Child Text");
+    expect(childText.closest("strong")).toBeInTheDocument();
   });
 
   it("renders h1 block with children", () => {

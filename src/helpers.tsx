@@ -1,4 +1,28 @@
+import React from "react";
 import type { ContractNode, TextNode } from "./types";
+
+export interface Marks {
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+}
+
+export const applyMarks = (
+  content: React.ReactNode,
+  marks: Marks
+): React.ReactNode => {
+  let wrapped = content;
+  if (marks.bold) {
+    wrapped = <strong>{wrapped}</strong>;
+  }
+  if (marks.italic) {
+    wrapped = <em>{wrapped}</em>;
+  }
+  if (marks.underline) {
+    wrapped = <u>{wrapped}</u>;
+  }
+  return wrapped;
+};
 
 export const extractMentions = (
   nodes: ContractNode[],

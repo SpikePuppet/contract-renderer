@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ContractNode, ElementNode, TextNode } from "../types";
-import { extractMentions, isTextNode } from "../helpers";
+import { extractMentions, isTextNode, applyMarks } from "../helpers.tsx";
 import type { MentionContextType } from "../types";
 
 // Context to track clause nesting level
@@ -50,15 +50,7 @@ const TextRenderer = ({ node }: { node: TextNode }) => {
   }
 
   // Apply semantic marks
-  if (node.bold) {
-    content = <strong>{content}</strong>;
-  }
-  if (node.italic) {
-    content = <em>{content}</em>;
-  }
-  if (node.underline) {
-    content = <u>{content}</u>;
-  }
+  content = applyMarks(content, node);
 
   return <>{content}</>;
 };
@@ -73,21 +65,6 @@ const ElementRenderer = ({
   const { type, children, text, color } = node;
   const clauseDepth = useContext(ClauseContext);
   const { values, updateValue } = useContext(MentionContext);
-
-  // Helper to wrap content with semantic tags based on marks
-  const wrapWithMarks = (content: React.ReactNode) => {
-    let wrapped = content;
-    if (node.bold) {
-      wrapped = <strong>{wrapped}</strong>;
-    }
-    if (node.italic) {
-      wrapped = <em>{wrapped}</em>;
-    }
-    if (node.underline) {
-      wrapped = <u>{wrapped}</u>;
-    }
-    return wrapped;
-  };
 
   const renderChildren = () => {
     if (children) {
@@ -105,38 +82,38 @@ const ElementRenderer = ({
 
   switch (type) {
     case "block":
-      return <div className="contract-block">{wrapWithMarks(content)}</div>;
+      return <div className="contract-block">{applyMarks(content, node)}</div>;
     case "h1":
-      return <h1 className="contract-title">{wrapWithMarks(content)}</h1>;
+      return <h1 className="contract-title">{applyMarks(content, node)}</h1>;
     case "h4":
-      return <h4 className="contract-subtitle">{wrapWithMarks(content)}</h4>;
+      return <h4 className="contract-subtitle">{applyMarks(content, node)}</h4>;
     case "p":
       // If a paragraph is nested inside another paragraph, render it as a span to avoid invalid HTML
       // and broken layout.
       if (parentType === "p") {
         return (
-          <span className="contract-text-inline">{wrapWithMarks(content)}</span>
+          <span className="contract-text-inline">
+            {applyMarks(content, node)}
+          </span>
         );
       }
-      return <p className="contract-text">{wrapWithMarks(content)}</p>;
+      return <p className="contract-text">{applyMarks(content, node)}</p>;
     case "ul":
-      return <ul className="contract-list">{wrapWithMarks(content)}</ul>;
+      return <ul className="contract-list">{applyMarks(content, node)}</ul>;
     case "li":
-      return <li className="contract-list-item">{wrapWithMarks(content)}</li>;
+      return (
+        <li className="contract-list-item">{applyMarks(content, node)}</li>
+      );
     case "lic":
       // List item content
       return (
-        <div className="contract-list-content">{wrapWithMarks(content)}</div>
+        <div className="contract-list-content">{applyMarks(content, node)}</div>
       );
     case "clause":
       return (
         <ClauseContext.Provider value={clauseDepth + 1}>
-          <section
-            className={
-              clauseDepth === 0 ? "contract-clause-main" : "contract-clause-sub"
-            }
-          >
-            {wrapWithMarks(content)}
+          <section className="contract-clause" data-depth={clauseDepth}>
+            {applyMarks(content, node)}
           </section>
         </ClauseContext.Provider>
       );
@@ -185,13 +162,13 @@ const ElementRenderer = ({
             display: "inline-block",
           }}
         >
-          {wrapWithMarks(content)}
+          {applyMarks(content, node)}
         </span>
       );
     default:
       return (
         <div className={`contract-element-${type}`}>
-          {wrapWithMarks(content)}
+          {applyMarks(content, node)}
         </div>
       );
   }
