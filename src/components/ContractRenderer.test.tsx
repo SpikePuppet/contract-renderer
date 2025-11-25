@@ -165,7 +165,13 @@ describe("ContractRenderer", () => {
       },
     ];
     const { container } = render(<ContractRenderer data={data} />);
-    const clauses = container.querySelectorAll(".contract-clause");
-    expect(clauses.length).toBe(2);
+    
+    const mainClause = container.querySelector('.contract-clause-main');
+    const subClause = container.querySelector('.contract-clause-sub');
+    
+    expect(mainClause).toBeInTheDocument();
+    expect(subClause).toBeInTheDocument();
+    // Check hierarchy
+    expect(mainClause).toContainElement(subClause);
   });
 });

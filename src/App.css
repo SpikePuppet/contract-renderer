@@ -73,27 +73,42 @@
 }
 
 /* Clauses */
-.contract-clause {
+.contract-renderer {
+  counter-reset: main-clause-counter;
+}
+
+.contract-clause-main {
+  display: list-item;
+  list-style-type: none;
+  counter-increment: main-clause-counter;
+  list-style-position: outside;
   margin-bottom: 16px;
-  counter-reset: subclause; /* Reset counter for nested clauses */
+  counter-reset: sub-clause-counter;
+  margin-left: 0; /* Reset default margin if needed */
 }
 
-/* Nested Clauses (e.g. Definitions items) */
-.contract-clause > .contract-clause {
-  margin-left: 0px; /* Screenshot doesn't show much indent for the (a) itself, maybe hanging indent? */
-  margin-bottom: 12px;
-  display: block;
-}
-
-.contract-clause > .contract-clause::before {
-  counter-increment: subclause;
-  content: "(" counter(subclause, lower-alpha) ") ";
-  font-weight: normal;
-  margin-right: 4px;
+.contract-clause-main::marker {
+  content: counter(main-clause-counter) ". ";
+  font-weight: bold;
   color: #333;
 }
 
-.contract-clause > .contract-clause > p {
+.contract-clause-sub {
+  display: list-item;
+  list-style-type: none;
+  counter-increment: sub-clause-counter;
+  list-style-position: outside;
+  margin-bottom: 12px;
+  margin-left: 20px; /* Indent nested clauses */
+}
+
+.contract-clause-sub::marker {
+  content: "(" counter(sub-clause-counter, lower-alpha) ") ";
+  font-weight: normal;
+  color: #333;
+}
+
+.contract-clause-sub > p {
   display: inline;
 }
 

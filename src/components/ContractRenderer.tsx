@@ -1,5 +1,8 @@
-import React from "react";
+import React, { createContext, useContext } from "react";
 import type { ContractNode, ElementNode, TextNode } from "../types";
+
+// Context to track clause nesting level
+const ClauseContext = createContext<number>(0);
 
 const isTextNode = (node: ContractNode): node is TextNode => {
   return "text" in node && !("type" in node);
@@ -46,6 +49,7 @@ const ElementRenderer = ({
   parentType?: string;
 }) => {
   const { type, children, text, color } = node;
+  const clauseDepth = useContext(ClauseContext);
 
   // Helper to wrap content with semantic tags based on marks
   const wrapWithMarks = (content: React.ReactNode) => {
@@ -103,7 +107,11 @@ const ElementRenderer = ({
       );
     case "clause":
       return (
-        <section className="contract-clause">{wrapWithMarks(content)}</section>
+        <ClauseContext.Provider value={clauseDepth + 1}>
+          <section className={clauseDepth === 0 ? "contract-clause-main" : "contract-clause-sub"}>
+            {wrapWithMarks(content)}
+          </section>
+        </ClauseContext.Provider>
       );
     case "mention":
       // For mentions, we might want to keep the style on the span itself or wrap inside.
@@ -147,9 +155,11 @@ const NodeRenderer = ({
 export const ContractRenderer = ({ data }: { data: ContractNode[] }) => {
   return (
     <div className="contract-renderer">
-      {data.map((node, index) => (
-        <NodeRenderer key={index} node={node} />
-      ))}
+      <ClauseContext.Provider value={0}>
+        {data.map((node, index) => (
+          <NodeRenderer key={index} node={node} />
+        ))}
+      </ClauseContext.Provider>
     </div>
   );
 };
